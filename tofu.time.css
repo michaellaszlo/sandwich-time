@@ -5,8 +5,13 @@
   font-family: Roboto;
 }
 
-#gameCanvas {
+#gameBox {
   border: 4px solid #666;
+  position: relative;
+  display: inline-block;
+}
+#gameBox canvas {
+  position: absolute;
 }
 
 #messageBox {

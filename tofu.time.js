@@ -2,18 +2,29 @@ var TofuTime = (function () {
   var levels = [
         {
           map: [
-            '   xxxxxx            ',
-            '   |  |              ',
-            '   |  xxxxxxx        ',
-            '   |       |         ',
-            '  xxxx   xxxxxxxx    ',
-            '          |          ',
-            '    xxxxxxxx         ',
-            '                     '
+            '                     ',
+            ' xxxxxxxxxxxxxxxxxxx ',
+            ' |    |      |     | ',
+            ' |    xxxxxxxx     | ',
+            ' |         |       | ',
+            ' xxxx    xxxxxxxx  | ',
+            '    |     |     |  | ',
+            '    xxxxxxx     |  | ',
+            '    |           |  | ',
+            ' xxxxxxx      xxxxxx ',
+            ' |     |      |    | ',
+            ' xxxxxxxxxxxxxxxxxxx '
           ]
         }
       ],
-      currentLevel;
+      currentLevel,
+      size = {
+        cell: 32,
+        container: { border: 4 }
+      },
+      container = {},
+      canvas = {},
+      context = {};
 
   function addMessage(s) {
     document.getElementById('messageBox').innerHTML += s + '<br>';
@@ -27,8 +38,8 @@ var TofuTime = (function () {
         dc = [ 0, 1, 0, -1 ],
         i, R, C,
         map = currentLevel.map,
-        rLimit = currentLevel.height,
-        cLimit = currentLevel.width;
+        rLimit = currentLevel.numRows,
+        cLimit = currentLevel.numCols;
     flooded[r][c] = true;
     cells.push({ r: r, c: c });
     for (i = 0; i < 4; ++i) {
@@ -64,21 +75,26 @@ var TofuTime = (function () {
     };
   }
 
+  function paintLevel() {
+  }
+
   function loadLevel(levelIndex) {
     var level = currentLevel = levels[levelIndex],
         map = level.map,
-        height = level.height = map.length,
-        width = level.width = map[0].length,
+        numRows = level.numRows = map.length,
+        numCols = level.numCols = map[0].length,
+        physicalWidth = numCols * size.cell,
+        physicalHeight = numRows * size.cell,
         platforms = [],
         ladders = [],
-        flooded = new Array(height),
+        flooded = new Array(numRows),
         thing,
         r, c, ch;
-    for (r = 0; r < height; ++r) {
-      flooded[r] = new Array(width);
+    for (r = 0; r < numRows; ++r) {
+      flooded[r] = new Array(numCols);
     }
-    for (r = 0; r < height; ++r) {
-      for (c = 0; c < width; ++c) {
+    for (r = 0; r < numRows; ++r) {
+      for (c = 0; c < numCols; ++c) {
         if (flooded[r][c]) {
           continue;
         }
@@ -93,9 +109,23 @@ var TofuTime = (function () {
         }
       }
     }
+    container.game.style.width = physicalWidth +
+        2 * size.container.border + 'px';
+    container.game.style.height = physicalHeight +
+        2 * size.container.border + 'px';
+    Object.keys(canvas).forEach(function (name) {
+      canvas[name].width = physicalWidth;
+      canvas[name].height = physicalHeight;
+    });
   }
 
   function load() {
+    container.game = document.getElementById('gameBox');
+    [ 'furniture', 'characters' ].forEach(function (name) {
+      canvas[name] = document.createElement('canvas');
+      context[name] = canvas[name].getContext('2d');
+      container.game.appendChild(canvas[name]);
+    });
     loadLevel(0);
     addMessage('Loaded.');
   }
