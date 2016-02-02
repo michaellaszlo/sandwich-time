@@ -33,6 +33,7 @@ var TofuTime = (function () {
         background: '#e0d9a9',
         platform: { stroke: '#2b3648', fill: '#48576f' }
       },
+      player,
       container = {},
       canvas = {},
       context = {};
@@ -150,6 +151,10 @@ var TofuTime = (function () {
     paintLevel();
   }
 
+  function Player() {
+    this.name = 'Player One';
+  }
+
   function load() {
     container.game = document.getElementById('gameBox');
     [ 'furniture', 'characters' ].forEach(function (name) {
@@ -157,6 +162,8 @@ var TofuTime = (function () {
       context[name] = canvas[name].getContext('2d');
       container.game.appendChild(canvas[name]);
     });
+    player = new Player();
+    console.log(player.name);
     loadLevel(0);
     addMessage('Loaded.');
   }
