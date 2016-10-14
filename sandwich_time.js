@@ -1,5 +1,7 @@
 var SandwichTime = (function () {
 
+  var level;
+
   function Slab(width, height, upperLeft, paint) {
     var width, height, upperLeft, paint;
     this.width = width;
@@ -15,13 +17,26 @@ var SandwichTime = (function () {
     this.slabs = slabs;
   }
 
+  function Grid(width, height) {
+    this.width = width;
+    this.height = height;
+  }
+
+  function Level(grid, towers) {
+    this.grid = grid;
+    this.towers = towers;
+  }
+
+  function makeRandomLevel(width, height) {
+    var grid = new Grid(width, height),
+        towers = [
+        ];
+    return new Level(grid, towers);
+  }
+
   function load() {
-    var slabs = [
-          new Slab(5, 2, { x: 10, y: 5 }, null),
-          new Slab(5, 2, { x: 10, y: 10 }, null)
-        ],
-        tower = new Tower(slabs);
-    console.log(JSON.stringify(tower.slabs));
+    level = makeRandomLevel(500, 800);
+    console.log('ready');
   }
 
   return {
