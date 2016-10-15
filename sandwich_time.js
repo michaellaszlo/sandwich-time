@@ -1,7 +1,17 @@
 var SandwichTime = (function () {
 
-  var level,
+  var slabPaint = {},
+      level,
       canvas;
+
+  slabPaint.tofu = function (context, slab) {
+    var x = slab.x, y = slab.y,
+        width = slab.width, height = slab.height;
+    context.fillStyle = '#f7f2da';
+    context.strokeStyle = '#cec9a5';
+    context.strokeRect(x, y, width, height);
+    context.fillRect(x, y, width, height);
+  };
 
   function Slab(x, y, width, height, paint) {
     var x, y, width, height, paint;
@@ -24,9 +34,10 @@ var SandwichTime = (function () {
         height = 15,
         gap = 30,
         x = 10, y = 10,
+        paint = slabPaint.tofu,
         i, slab;
     for (i = 0; i < numSlabs; ++i) {
-      slab = new Slab(x, y + i * (height + gap), width, height, null);
+      slab = new Slab(x, y + i * (height + gap), width, height, paint);
       slabs.push(slab);
     }
     return new Tower(slabs);
@@ -51,7 +62,7 @@ var SandwichTime = (function () {
       tower = this.towers[i];
       for (j = 0; j < tower.slabs.length; ++j) {
         slab = tower.slabs[j];
-        context.fillRect(slab.x, slab.y, slab.width, slab.height);
+        slab.paint(context, slab);
       }
     }
   };
