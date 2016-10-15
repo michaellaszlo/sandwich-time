@@ -30,10 +30,12 @@ var SandwichTime = (function () {
   function makeRandomTower(grid) {
     var slabs = [],
         numSlabs = 3,
-        width = 25 + Math.floor(grid.width / 10 * Math.random()),
+        width = 25 + Math.floor(Math.random() * grid.width / 10),
         height = 15,
         gap = 30,
-        x = 10, y = 10,
+        x = Math.floor(Math.random() * (grid.width - width)),
+        totalHeight = numSlabs * (height + gap) - gap,
+        y = Math.floor(Math.random() * totalHeight),
         paint = slabPaint.tofu,
         i, slab;
     for (i = 0; i < numSlabs; ++i) {
