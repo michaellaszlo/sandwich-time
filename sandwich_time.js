@@ -32,6 +32,14 @@ var SandwichTime = (function () {
     this.slabs = slabs;
     this.hopper = hopper;
   }
+  Tower.prototype.paint = function (context) {
+    var i, slab;
+    for (i = 0; i < this.slabs.length; ++i) {
+      slab = this.slabs[i];
+      slab.paint(context, slab);
+    }
+    this.hopper.paint(context);
+  };
 
   function Hopper(x, y, width, height, thickness) {
     var x, y, width, height, thickness;
@@ -42,7 +50,9 @@ var SandwichTime = (function () {
     this.thickness = thickness;
   }
   Hopper.prototype.paint = function (context) {
-
+    context.fillStyle = '#ceb4bf';
+    console.log(this.x, this.y, this.width, this.height);
+    context.fillRect(this.x, this.y, this.width, this.height);
   };
 
   function makeRandomTower(grid) {
@@ -82,17 +92,14 @@ var SandwichTime = (function () {
     this.height = grid.height;
   }
   Level.prototype.paint = function (context) {
-    var i, tower, j, slab;
+    var i, tower;
     // Background.
     context.fillStyle = this.color.background;
     context.fillRect(0, 0, this.width, this.height);
     // Towers.
     for (i = 0; i < this.towers.length; ++i) {
       tower = this.towers[i];
-      for (j = 0; j < tower.slabs.length; ++j) {
-        slab = tower.slabs[j];
-        slab.paint(context, slab);
-      }
+      tower.paint(context);
     }
   };
 
