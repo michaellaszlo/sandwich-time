@@ -5,6 +5,10 @@
   font-family: Roboto;
 }
 
+canvas {
+  display: block;
+}
+
 #levelBox {
   border: 4px solid #2b3648;
   display: inline-block;

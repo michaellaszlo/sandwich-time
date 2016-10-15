@@ -8,7 +8,7 @@ var SandwichTime = (function () {
     var x = slab.x, y = slab.y,
         width = slab.width, height = slab.height;
     context.fillStyle = '#f7f2da';
-    context.strokeStyle = '#cec9a5';
+    context.strokeStyle = '#57534b';
     context.strokeRect(x, y, width, height);
     context.fillRect(x, y, width, height);
   };
@@ -50,16 +50,22 @@ var SandwichTime = (function () {
     this.height = height;
   }
 
-  function Level(canvas, grid, towers) {
+  function Level(canvas, grid, towers, color) {
     this.canvas = canvas;
     this.grid = grid;
     this.towers = towers;
-    canvas.width = grid.width;
-    canvas.height = grid.height;
+    this.color = color;
+    this.width = canvas.width = grid.width;
+    this.height = canvas.height = grid.height;
   }
   Level.prototype.paint = function () {
     var context = this.canvas.getContext('2d'),
         i, tower, j, slab;
+    // Background.
+    context.fillStyle = this.color.background;
+    context.fillRect(0, 0, this.width, this.height);
+    console.log(0, 0, this.width, this.height);
+    // Towers.
     for (i = 0; i < this.towers.length; ++i) {
       tower = this.towers[i];
       for (j = 0; j < tower.slabs.length; ++j) {
@@ -73,12 +79,13 @@ var SandwichTime = (function () {
     var grid = new Grid(width, height),
         towers = [],
         numTowers = 1,
-        tower, i;
+        tower, i,
+        color = { background: '#073157' };
     for (i = 0; i < numTowers; ++i) {
       tower = makeRandomTower(grid);
       towers.push(tower);
     }
-    return new Level(canvas, grid, towers);
+    return new Level(canvas, grid, towers, color);
   }
 
   function load() {
