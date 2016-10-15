@@ -3,30 +3,30 @@ var SandwichTime = (function () {
   var level,
       canvas;
 
-  function Slab(width, height, upperLeft, paint) {
-    var width, height, upperLeft, paint;
+  function Slab(x, y, width, height, paint) {
+    var x, y, width, height, paint;
+    this.x = x;
+    this.y = y;
     this.width = width;
     this.height = height;
-    this.upperLeft = upperLeft;
     this.paint = paint;
   }
 
   function Tower(slabs) {
-    var numSlabs,
-        slabs;
-    this.numSlabs = slabs.length;
+    var slabs;
     this.slabs = slabs;
   }
 
   function makeRandomTower(grid) {
     var slabs = [],
         numSlabs = 3,
-        width = 5 + Math.floor(grid / 10 * Math.random()),
-        height = 4,
+        width = 25 + Math.floor(grid.width / 10 * Math.random()),
+        height = 15,
+        gap = 30,
         x = 10, y = 10,
         i, slab;
     for (i = 0; i < numSlabs; ++i) {
-      slab = new Slab(width, 4, { x: x + i * 30, y: y }, null);
+      slab = new Slab(x, y + i * (height + gap), width, height, null);
       slabs.push(slab);
     }
     return new Tower(slabs);
@@ -45,7 +45,15 @@ var SandwichTime = (function () {
     canvas.height = grid.height;
   }
   Level.prototype.paint = function () {
-    var context = this.canvas.getContext('2d');
+    var context = this.canvas.getContext('2d'),
+        i, tower, j, slab;
+    for (i = 0; i < this.towers.length; ++i) {
+      tower = this.towers[i];
+      for (j = 0; j < tower.slabs.length; ++j) {
+        slab = tower.slabs[j];
+        context.fillRect(slab.x, slab.y, slab.width, slab.height);
+      }
+    }
   };
 
   function makeRandomLevel(width, height) {
