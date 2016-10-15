@@ -36,6 +36,8 @@ var SandwichTime = (function () {
     this.height = height;
     this.thickness = thickness;
   }
+  Hopper.prototype.paint = function () {
+  };
 
   function makeRandomTower(grid) {
     var slabs = [],
@@ -66,21 +68,21 @@ var SandwichTime = (function () {
     this.height = height;
   }
 
-  function Level(canvas, grid, towers, color) {
-    this.canvas = canvas;
+  function Level(grid, towers, color) {
     this.grid = grid;
     this.towers = towers;
     this.color = color;
-    this.width = canvas.width = grid.width;
-    this.height = canvas.height = grid.height;
+    this.width = grid.width;
+    this.height = grid.height;
   }
-  Level.prototype.paint = function () {
-    var context = this.canvas.getContext('2d'),
+  Level.prototype.paint = function (canvas) {
+    var context = canvas.getContext('2d'),
         i, tower, j, slab;
+    canvas.width = this.width;
+    canvas.height = this.height;
     // Background.
     context.fillStyle = this.color.background;
     context.fillRect(0, 0, this.width, this.height);
-    console.log(0, 0, this.width, this.height);
     // Towers.
     for (i = 0; i < this.towers.length; ++i) {
       tower = this.towers[i];
@@ -101,14 +103,14 @@ var SandwichTime = (function () {
       tower = makeRandomTower(grid);
       towers.push(tower);
     }
-    return new Level(canvas, grid, towers, color);
+    return new Level(grid, towers, color);
   }
 
   function load() {
     canvas = document.createElement('canvas');
     document.getElementById('levelBox').appendChild(canvas);
     level = makeRandomLevel(750, 500);
-    level.paint();
+    level.paint(canvas);
     console.log('ready');
   }
 
