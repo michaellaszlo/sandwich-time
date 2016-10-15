@@ -5,13 +5,9 @@
   font-family: Roboto;
 }
 
-#gameBox {
+#levelBox {
   border: 4px solid #2b3648;
-  position: relative;
   display: inline-block;
-}
-#gameBox canvas {
-  position: absolute;
 }
 
 #messageBox {
