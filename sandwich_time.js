@@ -50,9 +50,21 @@ var SandwichTime = (function () {
     this.thickness = thickness;
   }
   Hopper.prototype.paint = function (context) {
+    var x = this.x, y = this.y,
+        thickness = this.thickness;
     context.fillStyle = '#ceb4bf';
-    console.log(this.x, this.y, this.width, this.height);
-    context.fillRect(this.x, this.y, this.width, this.height);
+    context.beginPath();
+    context.moveTo(x, y);
+    context.lineTo(x += thickness, y);
+    context.lineTo(x, y += (this.height - thickness));
+    context.lineTo(x += (this.width - 2*thickness), y); 
+    context.lineTo(x, y -= (this.height - thickness));
+    context.lineTo(x += thickness, y);
+    context.lineTo(x, y += this.height);
+    context.lineTo(x -= this.width, y);
+    context.lineTo(x, y -= this.height);
+    context.closePath();
+    context.fill();
   };
 
   function makeRandomTower(grid) {
@@ -62,18 +74,25 @@ var SandwichTime = (function () {
         slabHeight = 15,
         slabGap = 30,
         hopperThickness = 10,
-        x = Math.floor(Math.random() * (grid.width - slabWidth)),
+        totalWidth = slabWidth + 2*hopperThickness,
         totalHeight = numSlabs*(2*slabHeight + slabGap) + hopperThickness,
-        y = grid.height - totalHeight,
+        x = Math.floor(Math.random() * (grid.width - totalWidth)),
+        y = Math.floor(Math.random() * (grid.height - totalHeight)),
         hopper,
         paint = slabPaint.tofu,
         i, slab;
+    // Currently (x, y) is the top left corner of the tower's bounding
+    //  rectangle, which includes the hopper along with the slabs.
+    // Now we move to the corner of the top slab.
+    x += hopperThickness;
     for (i = 0; i < numSlabs; ++i) {
       slab = new Slab(x, y, slabWidth, slabHeight, paint);
       slabs.push(slab);
       y += slabHeight + slabGap;
     }
-    hopper = new Hopper(x - hopperThickness, y,
+    // Move to the corner of the hopper.
+    x -= hopperThickness;
+    hopper = new Hopper(x, y,
         2*hopperThickness + slabWidth, numSlabs*slabHeight + hopperThickness,
         hopperThickness);
     return new Tower(slabs, hopper);
