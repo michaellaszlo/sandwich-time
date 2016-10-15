@@ -22,27 +22,43 @@ var SandwichTime = (function () {
     this.paint = paint;
   }
 
-  function Tower(slabs) {
+  function Tower(slabs, hopper) {
     var slabs;
     this.slabs = slabs;
+    this.hopper = hopper;
+  }
+
+  function Hopper(x, y, width, height, thickness) {
+    var x, y, width, height, thickness;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.thickness = thickness;
   }
 
   function makeRandomTower(grid) {
     var slabs = [],
         numSlabs = 3,
-        width = 25 + Math.floor(Math.random() * grid.width / 10),
-        height = 15,
-        gap = 30,
-        x = Math.floor(Math.random() * (grid.width - width)),
-        totalHeight = numSlabs * (height + gap) - gap,
-        y = Math.floor(Math.random() * totalHeight),
+        slabWidth = 25 + Math.floor(Math.random() * grid.width / 10),
+        slabHeight = 15,
+        slabGap = 30,
+        hopperThickness = 10,
+        x = Math.floor(Math.random() * (grid.width - slabWidth)),
+        totalHeight = numSlabs*(2*slabHeight + slabGap) + hopperThickness,
+        y = grid.height - totalHeight,
+        hopper,
         paint = slabPaint.tofu,
         i, slab;
     for (i = 0; i < numSlabs; ++i) {
-      slab = new Slab(x, y + i * (height + gap), width, height, paint);
+      slab = new Slab(x, y, slabWidth, slabHeight, paint);
       slabs.push(slab);
+      y += slabHeight + slabGap;
     }
-    return new Tower(slabs);
+    hopper = new Hopper(x - hopperThickness, y,
+        2*hopperThickness + slabWidth, numSlabs*slabHeight + hopperThickness,
+        hopperThickness);
+    return new Tower(slabs, hopper);
   }
 
   function Grid(width, height) {
