@@ -14,8 +14,6 @@ var SandwichTime = (function () {
         y = offsetY + slab.y,
         width = slab.width, height = slab.height;
     context.fillStyle = '#f7f2da';
-    context.strokeStyle = '#57534b';
-    context.strokeRect(x, y, width, height);
     context.fillRect(x, y, width, height);
   };
 
@@ -152,19 +150,21 @@ var SandwichTime = (function () {
     var grid = new Grid(width, height),
         color = { background: '#073157' },
         gridArea = width * height,
-        minTowerDensity = 0.2,
+        minTowerDensity = 0.15,
         towers = [],
         tower, towerArea = 0,
-        x, y, okay, i, other, minDistance;
+        x, y, okay, count, countLimit, i, other, minDistance;
     while (towerArea / gridArea < minTowerDensity) {
       tower = makeRandomTower(grid);
       towerArea += tower.width * tower.height;
       towers.push(tower);
       // Position the current tower without getting too close to
       //  earlier towers.
-      minDistance = 0;
+      minDistance = 50;
       okay = false;
-      while (!okay) {
+      count = 0;
+      countLimit = 100;
+      while (++count <= countLimit && !okay) {
         okay = true;
         x = randrange(width - tower.width);
         y = randrange(height - tower.height);
@@ -181,6 +181,9 @@ var SandwichTime = (function () {
           okay = false;
           break;
         }
+      }
+      if (count > countLimit) {
+        console.log('reached limit', countLimit);
       }
       tower.x = x;
       tower.y = y;
