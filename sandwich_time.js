@@ -3,14 +3,15 @@ var SandwichTime = (function () {
 
   var slabPaint = {},
       dimensions = {
-        width: 750,
-        height: 500
+        width: 800,
+        height: 600
       },
       level,
       canvas;
 
-  slabPaint.tofu = function (context, slab) {
-    var x = slab.x, y = slab.y,
+  slabPaint.tofu = function (context, offsetX, offsetY, slab) {
+    var x = offsetX + slab.x,
+        y = offsetY + slab.y,
         width = slab.width, height = slab.height;
     context.fillStyle = '#f7f2da';
     context.strokeStyle = '#57534b';
@@ -38,10 +39,11 @@ var SandwichTime = (function () {
     this.height = height;
     this.thickness = thickness;
   }
-  Hopper.prototype.paint = function (context) {
-    var x = this.x, y = this.y,
+  Hopper.prototype.paint = function (context, offsetX, offsetY) {
+    var x = offsetX + this.x,
+        y = offsetY + this.y,
         thickness = this.thickness;
-    context.fillStyle = '#ceb4bf';
+    context.fillStyle = '#7b775e';
     context.beginPath();
     context.moveTo(x, y);
     context.lineTo(x += thickness, y);
@@ -68,15 +70,20 @@ var SandwichTime = (function () {
     var i, slab;
     for (i = 0; i < this.slabs.length; ++i) {
       slab = this.slabs[i];
-      slab.paint(context, slab);
+      slab.paint(context, this.x, this.y, slab);
     }
-    this.hopper.paint(context);
+    this.hopper.paint(context, this.x, this.y);
   };
 
   // randrange is much like Python's random.randrange: it returns a random
-  //  integer in the range [low, high). Unlike the Python version, there
-  //  is no error or warning if low >= high.
+  //  integer in the range [low, high). If only one argument is passed, it
+  //  is taken as high and low is set to zero. Unlike the Python version,
+  //  this function returns no error or warning if low >= high.
   function randrange(low, high) {
+    if (high === undefined) {
+      high = low;
+      low = 0;
+    }
     return low + Math.floor(Math.random() * (high - low));
   }
 
@@ -84,19 +91,19 @@ var SandwichTime = (function () {
     var slabs = [],
         paint = slabPaint.tofu,
         minNumSlabs = 2,
-        maxNumSlabs = 6,
-        slabHeight = 20,
-        minSlabWidth = 40,
-        maxSlabWidth = 100,
-        minGap = 50,
-        maxGap = 100,
-        hopperThickness = 15,
-        numSlabs, slabWidth,
-        i, slab, hopper, x, y;
+        maxNumSlabs = 5,
+        slabHeight = 15, 
+        minSlabWidth = 30,
+        maxSlabWidth = 80,
+        minGap = 30,
+        maxGap = 60,
+        hopperThickness = 8,
+        numSlabs, slabWidth, hopperWidth, hopperHeight,
+        i, slab, hopper, x, y, tower;
     // The local coordinates (x, y) designate a point within the tower's
     //  bounding rectangle. The top left corner is (0, 0).
     x = y = 0;
-    // Move to the corner of the top slab.
+    // Move to the top left corner of the top slab.
     x += hopperThickness;
     slabWidth = randrange(minSlabWidth, maxSlabWidth);
     numSlabs = randrange(minNumSlabs, maxNumSlabs + 1);
@@ -105,12 +112,16 @@ var SandwichTime = (function () {
       slabs.push(slab);
       y += slabHeight + randrange(minGap, maxGap + 1);
     }
-    // Move to the corner of the hopper.
+    // Move to the top left corner of the hopper.
     x -= hopperThickness;
-    hopper = new Hopper(x, y,
-        2*hopperThickness + slabWidth, numSlabs*slabHeight + hopperThickness,
-        hopperThickness);
-    return new Tower(slabs, hopper);
+    hopperWidth = 2*hopperThickness + slabWidth;
+    hopperHeight = numSlabs*slabHeight + hopperThickness;
+    hopper = new Hopper(x, y, hopperWidth, hopperHeight, hopperThickness);
+    tower = new Tower(slabs, hopper);
+    // Calculate the lower right corner of the bounding rectangle.
+    tower.width = x + hopperWidth;
+    tower.height = y + hopperHeight;
+    return tower;
   }
 
   function Grid(width, height) {
@@ -141,13 +152,38 @@ var SandwichTime = (function () {
     var grid = new Grid(width, height),
         color = { background: '#073157' },
         gridArea = width * height,
-        minTowerDensity = 0.1,
+        minTowerDensity = 0.2,
         towers = [],
-        tower, towerArea = 0;
+        tower, towerArea = 0,
+        x, y, okay, i, other, minDistance;
     while (towerArea / gridArea < minTowerDensity) {
       tower = makeRandomTower(grid);
-      towerArea += tower.boundingArea;
+      towerArea += tower.width * tower.height;
       towers.push(tower);
+      // Position the current tower without getting too close to
+      //  earlier towers.
+      minDistance = 0;
+      okay = false;
+      while (!okay) {
+        okay = true;
+        x = randrange(width - tower.width);
+        y = randrange(height - tower.height);
+        for (i = towers.length - 2; i >= 0; --i) {
+          other = towers[i];
+          if (x + tower.width + minDistance <= other.x ||
+              other.x + other.width + minDistance <= x) {
+            continue;
+          }
+          if (y + tower.height + minDistance <= other.y ||
+              other.y + other.height + minDistance <= y) {
+            continue;
+          }
+          okay = false;
+          break;
+        }
+      }
+      tower.x = x;
+      tower.y = y;
     }
     return new Level(grid, towers, color);
   }
