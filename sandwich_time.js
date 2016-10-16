@@ -18,6 +18,7 @@ var SandwichTime = (function () {
     context.fillRect(x, y, width, height);
   };
 
+  // Slabs make up a sandwich. A slab can be a slice of bread or a filling.
   function Slab(x, y, width, height, paint) {
     var x, y, width, height, paint;
     this.x = x;
@@ -27,20 +28,8 @@ var SandwichTime = (function () {
     this.paint = paint;
   }
 
-  function Tower(slabs, hopper) {
-    var slabs;
-    this.slabs = slabs;
-    this.hopper = hopper;
-  }
-  Tower.prototype.paint = function (context) {
-    var i, slab;
-    for (i = 0; i < this.slabs.length; ++i) {
-      slab = this.slabs[i];
-      slab.paint(context, slab);
-    }
-    this.hopper.paint(context);
-  };
-
+  // A hopper is a container for slabs. It sits at the bottom of a sandwich
+  //  tower and collects slabs as they fall, building up the sandwich.
   function Hopper(x, y, width, height, thickness) {
     var x, y, width, height, thickness;
     this.x = x;
@@ -67,28 +56,54 @@ var SandwichTime = (function () {
     context.fill();
   };
 
+  // A tower is a vertical sequence of slabs with a hopper at the bottom to
+  //  collect the slabs as the player makes them fall. When the final slab
+  //  falls into the hopper, the sandwich is complete.
+  function Tower(slabs, hopper) {
+    var slabs;
+    this.slabs = slabs;
+    this.hopper = hopper;
+  }
+  Tower.prototype.paint = function (context) {
+    var i, slab;
+    for (i = 0; i < this.slabs.length; ++i) {
+      slab = this.slabs[i];
+      slab.paint(context, slab);
+    }
+    this.hopper.paint(context);
+  };
+
+  // randrange is much like Python's random.randrange: it returns a random
+  //  integer in the range [low, high). Unlike the Python version, there
+  //  is no error or warning if low >= high.
+  function randrange(low, high) {
+    return low + Math.floor(Math.random() * (high - low));
+  }
+
   function makeRandomTower(grid) {
     var slabs = [],
-        numSlabs = 3,
-        slabWidth = 25 + Math.floor(Math.random() * grid.width / 10),
-        slabHeight = 15,
-        slabGap = 30,
-        hopperThickness = 10,
-        totalWidth = slabWidth + 2*hopperThickness,
-        totalHeight = numSlabs*(2*slabHeight + slabGap) + hopperThickness,
-        x = Math.floor(Math.random() * (grid.width - totalWidth)),
-        y = Math.floor(Math.random() * (grid.height - totalHeight)),
-        hopper,
         paint = slabPaint.tofu,
-        i, slab;
-    // Currently (x, y) is the top left corner of the tower's bounding
-    //  rectangle, which includes the hopper along with the slabs.
-    // Now we move to the corner of the top slab.
+        minNumSlabs = 2,
+        maxNumSlabs = 6,
+        slabHeight = 20,
+        minSlabWidth = 40,
+        maxSlabWidth = 100,
+        minGap = 50,
+        maxGap = 100,
+        hopperThickness = 15,
+        numSlabs, slabWidth,
+        i, slab, hopper, x, y;
+    // The local coordinates (x, y) designate a point within the tower's
+    //  bounding rectangle. The top left corner is (0, 0).
+    x = y = 0;
+    // Move to the corner of the top slab.
     x += hopperThickness;
+    slabWidth = randrange(minSlabWidth, maxSlabWidth);
+    numSlabs = randrange(minNumSlabs, maxNumSlabs + 1);
     for (i = 0; i < numSlabs; ++i) {
       slab = new Slab(x, y, slabWidth, slabHeight, paint);
       slabs.push(slab);
-      y += slabHeight + slabGap;
+      y += slabHeight + randrange(minGap, maxGap + 1);
     }
     // Move to the corner of the hopper.
     x -= hopperThickness;
@@ -124,12 +139,14 @@ var SandwichTime = (function () {
 
   function makeRandomLevel(width, height) {
     var grid = new Grid(width, height),
+        color = { background: '#073157' },
+        gridArea = width * height,
+        minTowerDensity = 0.1,
         towers = [],
-        numTowers = 1,
-        tower, i,
-        color = { background: '#073157' };
-    for (i = 0; i < numTowers; ++i) {
+        tower, towerArea = 0;
+    while (towerArea / gridArea < minTowerDensity) {
       tower = makeRandomTower(grid);
+      towerArea += tower.boundingArea;
       towers.push(tower);
     }
     return new Level(grid, towers, color);
