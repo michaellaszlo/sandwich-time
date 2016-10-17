@@ -6,8 +6,9 @@ var SandwichTime = (function () {
         width: 800,
         height: 600
       },
-      level,
-      canvas;
+      canvases = {},
+      contexts = {},
+      level;
 
   slabPaint.tofu = function (context, offsetX, offsetY, slab) {
     var x = offsetX + slab.x,
@@ -68,8 +69,8 @@ var SandwichTime = (function () {
   }
   Tower.prototype.paint = function (context) {
     var i, slab;
-    context.fillStyle = '#324873';
-    context.fillRect(this.x, this.y, this.width, this.height);
+    contexts.background.fillStyle = '#30435c';
+    contexts.background.fillRect(this.x, this.y, this.width, this.height);
     for (i = 0; i < this.slabs.length; ++i) {
       slab = this.slabs[i];
       slab.paint(context, this.x, this.y, slab);
@@ -135,15 +136,15 @@ var SandwichTime = (function () {
     this.width = grid.width;
     this.height = grid.height;
   }
-  Level.prototype.paint = function (context) {
+  Level.prototype.paint = function () {
     var i, tower;
     // Background.
-    context.fillStyle = this.color.background;
-    context.fillRect(0, 0, this.width, this.height);
+    contexts.background.fillStyle = this.color.background;
+    contexts.background.fillRect(0, 0, this.width, this.height);
     // Towers.
     for (i = 0; i < this.towers.length; ++i) {
       tower = this.towers[i];
-      tower.paint(context);
+      tower.paint(contexts.tower);
     }
   };
 
@@ -193,12 +194,18 @@ var SandwichTime = (function () {
   }
 
   function load() {
-    canvas = document.createElement('canvas');
-    document.getElementById('levelBox').appendChild(canvas);
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    var box = document.getElementById('levelBox');
+    box.style.width = dimensions.width + 8 + 'px';
+    box.style.height = dimensions.height + 8 + 'px';
+    [ 'background', 'tower', 'platform', 'overlay' ].forEach(function (name) {
+      var canvas = canvases[name] = document.createElement('canvas');
+      box.appendChild(canvas);
+      canvas.width = dimensions.width;
+      canvas.height = dimensions.height;
+      contexts[name] = canvas.getContext('2d');
+    });
     level = makeRandomLevel(dimensions.width, dimensions.height);
-    level.paint(canvas.getContext('2d'));
+    level.paint();
     console.log('ready');
   }
 
