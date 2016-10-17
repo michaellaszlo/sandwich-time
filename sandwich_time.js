@@ -63,9 +63,13 @@ var SandwichTime = (function () {
     var slabs;
     this.slabs = slabs;
     this.hopper = hopper;
+    this.width = hopper.x + hopper.width;
+    this.height = hopper.y + hopper.height;
   }
   Tower.prototype.paint = function (context) {
     var i, slab;
+    context.fillStyle = '#324873';
+    context.fillRect(this.x, this.y, this.width, this.height);
     for (i = 0; i < this.slabs.length; ++i) {
       slab = this.slabs[i];
       slab.paint(context, this.x, this.y, slab);
@@ -116,9 +120,6 @@ var SandwichTime = (function () {
     hopperHeight = numSlabs*slabHeight + hopperThickness;
     hopper = new Hopper(x, y, hopperWidth, hopperHeight, hopperThickness);
     tower = new Tower(slabs, hopper);
-    // Calculate the lower right corner of the bounding rectangle.
-    tower.width = x + hopperWidth;
-    tower.height = y + hopperHeight;
     return tower;
   }
 
