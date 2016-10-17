@@ -6,6 +6,8 @@ var SandwichTime = (function () {
         width: 800,
         height: 600
       },
+      max = Math.max,
+      min = Math.min,
       canvases = {},
       contexts = {},
       level;
@@ -152,22 +154,79 @@ var SandwichTime = (function () {
     var grid = new Grid(width, height),
         color = { background: '#073157' },
         gridArea = width * height,
-        targetTowerDensity = 0.15,
+        targetDensity = 0.15,
+        numShuffleRounds = 10, i, j, k, a, b,
+        spaceUp, spaceRight, spaceDown, spaceLeft, totalSpace, slide,
         towers = [],
         tower, towerArea = 0,
         x = 0;
-    while (towerArea / gridArea < targetTowerDensity) {
+    // Make towers and line them up along the bottom of the grid, starting from
+    //  the left corner. Stop when the next tower won't fit or when target
+    //  density is reached, whichever happens first.
+    while (towerArea / gridArea < targetDensity) {
       tower = makeRandomTower(grid);
       if (x + tower.width > width) {
         break;
       }
       towerArea += tower.width * tower.height;
       towers.push(tower);
-      // Position the current tower without getting too close to
-      //  earlier towers.
       tower.x = x;
       tower.y = height - tower.height;
       x += tower.width;
+    }
+    console.log(Math.round(100 * towerArea / gridArea) + '% tower density');
+    // Shuffle the towers: slide them random distances in axial directions.
+    for (i = 0; i < numShuffleRounds; ++i) {
+      for (j = 0; j < towers.length; ++j) {
+        a = towers[j];
+        // Determine the maximum amount we could possibly slide this tower.
+        spaceUp = a.y;
+        spaceRight = width - (a.x + a.width);
+        spaceDown = height - (a.y + a.height);
+        spaceLeft = a.x;
+        // See if another tower protrudes into the sliding lane.
+        for (k = 0; k < towers.length; ++k) {
+          if (k == j) {
+            continue;
+          }
+          b = towers[k];
+          // Up.
+          if (b.y + b.height <= a.y) {
+            if (max(a.x, b.x) < min(a.x + a.width, b.x + b.width)) {
+              spaceUp = min(spaceUp, a.y - (b.y + b.height));
+            }
+          }
+          // Right.
+          if (b.x >= a.x + a.width) {
+            if (max(a.y, b.y) < min(a.y + a.height, b.y + b.height)) {
+              spaceRight = min(spaceRight, b.x - (a.x + a.width));
+            }
+          }
+          // Down.
+          if (b.y >= a.y + a.height) {
+            if (max(a.x, b.x) < min(a.x + a.width, b.x + b.width)) {
+              spaceDown = min(spaceDown, b.y - (a.y + a.height));
+            }
+          }
+          // Left.
+          if (b.x + b.width <= a.x) {
+            if (max(a.y, b.y) < min(a.y + a.height, b.y + b.height)) {
+              spaceLeft = min(spaceLeft, a.x - (b.x + b.width));
+            }
+          }
+        }
+        totalSpace = spaceUp + spaceRight + spaceLeft + spaceDown;
+        slide = randrange(totalSpace + 1);
+        if ((slide -= spaceUp) < 0) {
+          a.y += slide;
+        } else if ((slide -= spaceRight) < 0) {
+          a.x -= slide;
+        } else if ((slide -= spaceDown) < 0) {
+          a.y -= slide;
+        } else {
+          a.x += (slide -= spaceLeft);
+        }
+      }
     }
     return new Level(grid, towers, color);
   }
