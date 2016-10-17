@@ -29,6 +29,8 @@ into the lower left corner. Then we move each tower by sliding it a
 random distance along an axis direction. We iterate over the towers for
 several rounds of random sliding.
 
+![Randomly generated Sandwich Time level](https://github.com/michaellaszlo/sandwich-time/blob/master/screenshot.png)
+
 
 ## What's next
 
