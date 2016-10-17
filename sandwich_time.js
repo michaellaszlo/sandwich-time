@@ -3,7 +3,7 @@ var SandwichTime = (function () {
 
   var slabPaint = {},
       dimensions = {
-        width: 800,
+        width: 600,
         height: 600
       },
       max = Math.max,
@@ -154,8 +154,9 @@ var SandwichTime = (function () {
     var grid = new Grid(width, height),
         color = { background: '#073157' },
         gridArea = width * height,
-        targetDensity = 0.15,
-        numShuffleRounds = 10, i, j, k, a, b,
+        targetDensity = randrange(10, 31) / 100,
+        minGap = 10,
+        numShuffleRounds = 100, i, j, k, a, b,
         spaceUp, spaceRight, spaceDown, spaceLeft, totalSpace, slide,
         towers = [],
         tower, towerArea = 0,
@@ -218,13 +219,22 @@ var SandwichTime = (function () {
         totalSpace = spaceUp + spaceRight + spaceLeft + spaceDown;
         slide = randrange(totalSpace + 1);
         if ((slide -= spaceUp) < 0) {
-          a.y += slide;
+          if (-slide >= 2 * minGap) {
+            a.y += -randrange(minGap, -slide - minGap + 1);
+          }
         } else if ((slide -= spaceRight) < 0) {
-          a.x -= slide;
+          if (-slide >= 2 * minGap) {
+            a.x -= -randrange(minGap, -slide - minGap + 1);
+          }
         } else if ((slide -= spaceDown) < 0) {
-          a.y -= slide;
+          if (-slide >= 2 * minGap) {
+            a.y -= -randrange(minGap, -slide - minGap + 1);
+          }
         } else {
-          a.x += (slide -= spaceLeft);
+          slide -= spaceLeft;
+          if (-slide >= 2 * minGap) {
+            a.x += -randrange(minGap, -slide - minGap + 1);
+          }
         }
       }
     }
