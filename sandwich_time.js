@@ -152,43 +152,22 @@ var SandwichTime = (function () {
     var grid = new Grid(width, height),
         color = { background: '#073157' },
         gridArea = width * height,
-        minTowerDensity = 0.15,
+        targetTowerDensity = 0.15,
         towers = [],
         tower, towerArea = 0,
-        x, y, okay, count, countLimit, i, other, minDistance;
-    while (towerArea / gridArea < minTowerDensity) {
+        x = 0;
+    while (towerArea / gridArea < targetTowerDensity) {
       tower = makeRandomTower(grid);
+      if (x + tower.width > width) {
+        break;
+      }
       towerArea += tower.width * tower.height;
       towers.push(tower);
       // Position the current tower without getting too close to
       //  earlier towers.
-      minDistance = 50;
-      okay = false;
-      count = 0;
-      countLimit = 100;
-      while (++count <= countLimit && !okay) {
-        okay = true;
-        x = randrange(width - tower.width);
-        y = randrange(height - tower.height);
-        for (i = towers.length - 2; i >= 0; --i) {
-          other = towers[i];
-          if (x + tower.width + minDistance <= other.x ||
-              other.x + other.width + minDistance <= x) {
-            continue;
-          }
-          if (y + tower.height + minDistance <= other.y ||
-              other.y + other.height + minDistance <= y) {
-            continue;
-          }
-          okay = false;
-          break;
-        }
-      }
-      if (count > countLimit) {
-        console.log('reached limit', countLimit);
-      }
       tower.x = x;
-      tower.y = y;
+      tower.y = height - tower.height;
+      x += tower.width;
     }
     return new Level(grid, towers, color);
   }
